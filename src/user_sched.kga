@@ -16,8 +16,42 @@ label start
     cpu_exec
     jump_if label:exit
 
-    // copy REG_RES to REG_A
-    write 50 to REG_B
+    var command_line
+    var priority_value
+    copy REG_RES to var:command_line
+    
+    write "Enter priority (0-100, lower is higher priority): " to REG_A
+    write COLOR_CYAN to REG_B
+    write SYS_CALL_PRINT to REG_D
+    write OP_SYS_CALL to REG_OP
+    cpu_exec
+    
+    write KEYBOARD_READ_LINE to REG_A
+    write SYS_CALL_READ_INPUT to REG_D
+    write OP_SYS_CALL to REG_OP
+    cpu_exec
+    
+    copy REG_RES to REG_A
+    write OP_IS_NUM to REG_OP
+    cpu_exec
+    jump_if_not label:invalid_priority
+    
+    copy REG_RES to REG_A
+    write 0 to REG_B
+    write OP_CMP_LT to REG_OP
+    cpu_exec
+    jump_if label:invalid_priority
+    
+    write 100 to REG_A
+    copy REG_RES to REG_B
+    write OP_CMP_LT to REG_OP
+    cpu_exec
+    jump_if label:invalid_priority
+    
+    copy REG_RES to var:priority_value
+    
+    copy var:command_line to REG_A
+    copy var:priority_value to REG_B
     write SYS_CALL_SCHED_PROGRAM to REG_D
     write OP_SYS_CALL to REG_OP
     cpu_exec
@@ -32,11 +66,27 @@ label start
     cpu_exec
 
     copy var:pid to REG_A
-    // write COLOR_GREEN to REG_B
     write SYS_CALL_PRINTLN to REG_D
-    // write OP_SYS_CALL to REG_OP
+    cpu_exec
+    
+    write "Process priority: " to REG_A
+    write COLOR_CYAN to REG_B
+    write SYS_CALL_PRINT to REG_D
+    write OP_SYS_CALL to REG_OP
+    cpu_exec
+    
+    copy var:priority_value to REG_A
+    write SYS_CALL_PRINTLN to REG_D
     cpu_exec
 
+    jump label:start
+
+label invalid_priority
+    write "Invalid priority. Please use a number between 0 and 100." to REG_A
+    write COLOR_RED to REG_B
+    write SYS_CALL_PRINTLN to REG_D
+    write OP_SYS_CALL to REG_OP
+    cpu_exec
     jump label:start
 
 label exit
@@ -52,3 +102,4 @@ label error
     write OP_SYS_CALL to REG_OP
     cpu_exec
     jump label:start
+

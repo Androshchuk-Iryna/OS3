@@ -15,7 +15,7 @@ mario 7 7 7 user user BLOCKS 111 261
 clear 7 7 7 user user BLOCKS 262 275
 debug 7 7 7 user user BLOCKS 276 320
 sleep 7 7 7 user user BLOCKS 321 335
-user_sched 7 7 7 user group BLOCKS 336 395
+user_sched 7 7 7 user group BLOCKS 550 750
 minion 7 7 7 user user BLOCKS 396 547
 
 
@@ -547,107 +547,107 @@ c
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+1 96 4         #  write "Enter command to schedule or command exit to quit:" => REG_A
+1 97 6         #  write COLOR_NO => REG_B
+1 98 10        #  write SYS_CALL_PRINTLN => REG_D
+1 99 2         #  write OP_SYS_CALL => REG_OP
+0              #  cpu_exec
+1 100 4        #  write KEYBOARD_READ_LINE => REG_A
+1 101 10       #  write SYS_CALL_READ_INPUT => REG_D
+1 99 2         #  write OP_SYS_CALL => REG_OP
+0              #  cpu_exec
+1 12 4         #  copy REG_RES => REG_A
+1 102 6        #  write "exit" => REG_B
+1 103 2        #  write OP_CMP_EQ => REG_OP
+0              #  cpu_exec
+4 86           #  jump_if lbl:exit
+1 12 118       #  copy REG_RES => var:command_line
+1 104 4        #  write "Enter priority (0-100, lower is higher priority): " => REG_A
+1 105 6        #  write COLOR_CYAN => REG_B
+1 106 10       #  write SYS_CALL_PRINT => REG_D
+1 99 2         #  write OP_SYS_CALL => REG_OP
+0              #  cpu_exec
+1 100 4        #  write KEYBOARD_READ_LINE => REG_A
+1 101 10       #  write SYS_CALL_READ_INPUT => REG_D
+1 99 2         #  write OP_SYS_CALL => REG_OP
+0              #  cpu_exec
+1 12 4         #  copy REG_RES => REG_A
+1 107 2        #  write OP_IS_NUM => REG_OP
+0              #  cpu_exec
+5 80           #  jump_if_not lbl:invalid_priority
+1 12 4         #  copy REG_RES => REG_A
+1 108 6        #  write "0" => REG_B
+1 109 2        #  write OP_CMP_LT => REG_OP
+0              #  cpu_exec
+4 80           #  jump_if lbl:invalid_priority
+1 110 4        #  write "100" => REG_A
+1 12 6         #  copy REG_RES => REG_B
+1 109 2        #  write OP_CMP_LT => REG_OP
+0              #  cpu_exec
+4 80           #  jump_if lbl:invalid_priority
+1 12 119       #  copy REG_RES => var:priority
+1 118 4        #  copy var:command_line => REG_A
+1 119 6        #  copy var:priority => REG_B
+1 111 10       #  write SYS_CALL_SCHED_PROGRAM => REG_D
+1 99 2         #  write OP_SYS_CALL => REG_OP
+0              #  cpu_exec
+6 90           #  jump_err lbl:error
+1 12 120       #  copy REG_RES => var:pid
+1 112 4        #  write "Program loaded with PID " => REG_A
+1 113 6        #  write COLOR_GREEN => REG_B
+1 106 10       #  write SYS_CALL_PRINT => REG_D
+1 99 2         #  write OP_SYS_CALL => REG_OP
+0              #  cpu_exec
+1 120 4        #  copy var:pid => REG_A
+1 98 10        #  write SYS_CALL_PRINTLN => REG_D
+0              #  cpu_exec
+1 114 4        #  write "Process priority: " => REG_A
+1 105 6        #  write COLOR_CYAN => REG_B
+1 106 10       #  write SYS_CALL_PRINT => REG_D
+1 99 2         #  write OP_SYS_CALL => REG_OP
+0              #  cpu_exec
+1 119 4        #  copy var:priority => REG_A
+1 98 10        #  write SYS_CALL_PRINTLN => REG_D
+0              #  cpu_exec
+3 17           #  jump lbl:start
+1 115 4        #  write "Invalid priority. Please use a number between 0 and 100." => REG_A
+1 116 6        #  write COLOR_RED => REG_B
+1 98 10        #  write SYS_CALL_PRINTLN => REG_D
+1 99 2         #  write OP_SYS_CALL => REG_OP
+0              #  cpu_exec
+3 17           #  jump lbl:start
+1 108 4        #  write "0" => REG_A
+1 117 10       #  write SYS_CALL_EXIT => REG_D
+1 99 2         #  write OP_SYS_CALL => REG_OP
+0              #  cpu_exec
+1 16 4         #  copy REG_ERROR => REG_A
+1 116 6        #  write COLOR_RED => REG_B
+1 98 10        #  write SYS_CALL_PRINTLN => REG_D
+1 99 2         #  write OP_SYS_CALL => REG_OP
+0              #  cpu_exec
+3 17           #  jump lbl:start
+Enter command to schedule or command exit to quit:
+0
+1
+25
+KeyboardReadLine
+3
+exit
+8
+Enter priority (0-100, lower is higher priority): 
+7
+2
+7
+0
+10
+100
+14
+Program loaded with PID 
+1
+Process priority: 
+Invalid priority. Please use a number between 0 and 100.
+3
+0
 
 
 

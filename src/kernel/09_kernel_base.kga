@@ -153,11 +153,46 @@ label sched_cmd
 
     label do_sched_load
         var do_sched_load_cmdline
+        var do_sched_load_priority // Add a variable to store the priority
         copy REG_RES to var:do_sched_load_cmdline
-    
-        // Load program for further execution:
+        
+        // Prompt for priority
+        write "Enter priority (0-100, lower is higher priority): " to DISPLAY_BUFFER
+        write COLOR_CYAN to DISPLAY_COLOR
+        write OP_DISPLAY to REG_OP
+        cpu_exec
+        
+        // Read priority input
+        write KEYBOARD_READ_LINE to REG_A
+        write OP_READ_INPUT to REG_OP
+        cpu_exec
+        
+        // Check if input is a valid number
+        copy KEYBOARD_BUFFER to REG_A
+        write OP_IS_NUM to REG_OP
+        cpu_exec
+        jump_if_not label:do_sched_invalid_priority
+        
+        // Check if number is in valid range (0-100)
+        // Check if < 0
+        copy KEYBOARD_BUFFER to REG_A
+        write 0 to REG_B
+        write OP_CMP_LT to REG_OP
+        cpu_exec
+        jump_if label:do_sched_invalid_priority
+        
+        // Check if > 100 by testing if 100 < KEYBOARD_BUFFER
+        write 100 to REG_A
+        copy KEYBOARD_BUFFER to REG_B
+        write OP_CMP_LT to REG_OP
+        cpu_exec
+        jump_if label:do_sched_invalid_priority
+        
+        copy KEYBOARD_BUFFER to var:do_sched_load_priority
+        
+        // Load program for further execution
         copy var:do_sched_load_cmdline to REG_A
-        write 50 to REG_B // set priority of the process
+        copy var:do_sched_load_priority to REG_B // Set priority
         copy PROGRAM_COUNTER to var:sys_return
         jump label:sys_sched_process_load
         jump_err label:do_sched_file_error
@@ -169,6 +204,24 @@ label sched_cmd
 
         copy KEYBOARD_BUFFER to DISPLAY_BUFFER
         // write COLOR_GREEN to DISPLAY_COLOR
+        write OP_DISPLAY_LN to REG_OP
+        cpu_exec
+        
+        write "Process priority: " to DISPLAY_BUFFER
+        write COLOR_CYAN to DISPLAY_COLOR
+        write OP_DISPLAY to REG_OP
+        cpu_exec
+        
+        // Display the priority from our saved variable, not from REG_B
+        copy var:do_sched_load_priority to DISPLAY_BUFFER
+        write OP_DISPLAY_LN to REG_OP
+        cpu_exec
+        
+        jump label:kernel_start
+        
+    label do_sched_invalid_priority
+        write "Invalid priority. Please use a number between 0 and 100." to DISPLAY_BUFFER
+        write COLOR_RED to DISPLAY_COLOR
         write OP_DISPLAY_LN to REG_OP
         cpu_exec
         jump label:kernel_start
@@ -206,8 +259,10 @@ label sched_cmd
 
 label exec_file
     // Load program for further execution:
+    var exec_file_priority
+    write 50 to var:exec_file_priority // Use a default priority of 50 for direct execution
     copy KEYBOARD_BUFFER to REG_A
-    write 100 to REG_B // set process priority
+    copy var:exec_file_priority to REG_B // Set priority from our variable
     copy PROGRAM_COUNTER to var:sys_return
     jump label:sys_sched_process_load
     jump_err label:exec_file_error
